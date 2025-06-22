@@ -26,14 +26,21 @@ LIBS += -lcrypto
 LIBS += -lhomecontroller
 LIBS += -lpigpio
 
+# driver
+_OBJECTS += driver/driver.o
+_HEADERS += driver/driver.h
+
+_OBJECTS += driver/rpi_z_driver.o
+_HEADERS += driver/rpi_z_driver.h
+
+_OBJECTS += driver/test_driver.o
+_HEADERS += driver/test_driver.h
+
 # root
 _OBJECTS += config.o
 _HEADERS += config.h
 
 _OBJECTS += main.o
-
-_OBJECTS += pwm.o
-_HEADERS += pwm.h
 
 _OBJECTS += plug.o
 _HEADERS += plug.h

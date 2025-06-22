@@ -1,41 +1,39 @@
 #pragma once
 
-#include <homecontroller/api/device.h>
-#include <homecontroller/api/device_data/rgb_lights.h>
+#include "driver/driver.h"
 
-#include "config.h"
-#include "drivers/driver.h"
-#include "programs/program.h"
+#include <homecontroller/api/device.h>
+#include <homecontroller/api/device_data/plug.h>
 
 #include <condition_variable>
-#include <memory>
 #include <mutex>
 
-class RGBLights : public hc::api::Device<hc::api::rgb_lights::State> {
+class Plug : public hc::api::Device<hc::api::plug::State> {
   public:
-    struct CommandLineArgs {
-        std::string m_config_path;
+    struct Config {
+        std::string m_model_str;
+        int m_gpio_pin;
+        int m_lock_duration;
+
+        std::string m_device_id;
+        std::string m_secret;
+
+        std::string m_gateway_url;
+        std::string m_gateway_namespace;
+
+        int m_reconn_delay;
+        int m_reconn_attempts;
     };
 
-    RGBLights()
-        : Device("RGBLights"), m_loop_needs_reset(false),
-          m_shutting_down(false) {}
-    ~RGBLights() {}
+    Plug(const Config& config)
+        : Device("Plug@" + std::to_string(config.m_gpio_pin)),
+          m_config(config) {}
+    ~Plug() {}
 
-    bool init(const CommandLineArgs& args);
-
+    bool init(const std::shared_ptr<Driver>& driver);
     void shutdown();
 
-    void set_init_finished_cb(std::function<void()> init_finished_cb) {
-        m_init_finished_cb = init_finished_cb;
-    }
-
-    void set_color(uint8_t r, uint8_t g, uint8_t b,
-                   bool update_on_server = true);
-
   private:
-    bool init_driver(const std::string& driver_name);
-
     void loop();
 
     void on_command_received(
@@ -43,39 +41,13 @@ class RGBLights : public hc::api::Device<hc::api::rgb_lights::State> {
 
     ::sio::message::ptr serialize_state() const override;
 
-    void handle_power_on(hc::api::rgb_lights::State& state);
-    void handle_power_off(hc::api::rgb_lights::State& state);
-    void handle_set_color(hc::api::rgb_lights::State& state,
-                          bool& needs_update_ref,
-                          std::map<std::string, ::sio::message::ptr>& data);
-    void handle_start_program(hc::api::rgb_lights::State& state,
-                              std::map<std::string, ::sio::message::ptr>& data);
-    void
-    handle_interrupt_program(std::map<std::string, ::sio::message::ptr>& data);
-    void handle_stop_program(hc::api::rgb_lights::State& state);
-
-    void reset_program(hc::api::rgb_lights::State::Program program);
-
-    std::function<void()> m_init_finished_cb;
+    void handle_power_on(hc::api::plug::State& state);
+    void handle_power_off(hc::api::plug::State& state);
 
     Config m_config;
 
-    std::unique_ptr<Driver> m_driver;
+    std::shared_ptr<Driver::HardwareInterface> m_interface;
 
-    std::unique_ptr<Program> m_program_ptr;
-
-    std::mutex m_mutex_loop;
-    std::mutex m_mutex_command;
-
-    std::condition_variable m_cv_loop;
-    bool m_loop_needs_reset;
-
-    bool m_shutting_down;
-
-    // storage for powering on/off
-    hc::api::rgb_lights::State::Program m_last_program;
-
-    uint8_t m_last_r;
-    uint8_t m_last_g;
-    uint8_t m_last_b;
+    std::mutex m_mutex;
+    std::condition_variable m_cv;
 };

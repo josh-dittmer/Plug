@@ -1,62 +1,39 @@
 #pragma once
 
-#include <homecontroller/util/logger.h>
+#include "plug.h"
+
+#include <homecontroller/util/result.h>
 
 #include <rapidjson/document.h>
+#include <vector>
 
 class Config {
   public:
     struct Values {
-        std::string m_driver;
-        std::string m_gateway_url;
-        std::string m_gateway_namespace;
-        std::string m_device_id;
-        std::string m_secret;
         std::string m_log_level_str;
-        int m_reconn_delay;
-        int m_reconn_attempts;
+        std::string m_driver_str;
+        std::vector<Plug::Config> m_plugs;
     };
 
-    Config() : m_logger("Config") {}
+    Config(const std::string& path) : m_path(path) {}
     ~Config() {}
 
-    bool load(const std::string& path);
-
-    void print();
-
-    const Values& get_values() { return m_values; }
-
-    const std::string& get_driver() { return m_values.m_driver; }
-    const std::string& get_gateway_url() { return m_values.m_gateway_url; }
-    const std::string& get_gateway_namespace() {
-        return m_values.m_gateway_namespace;
-    }
-    const std::string& get_device_id() { return m_values.m_device_id; }
-    const std::string& get_secret() { return m_values.m_secret; }
-    const std::string& get_log_level_str() { return m_values.m_log_level_str; }
-    int get_reconn_delay() { return m_values.m_reconn_delay; }
-    int get_reconn_attempts() { return m_values.m_reconn_attempts; }
+    Result<Values> load();
+    std::string to_str();
 
   private:
-    class ReadException : public std::exception {
-      public:
-        ReadException(const std::string& type, const std::string& name) {
-            m_msg = "Failed to read required " + type + " \"" + name + "\"";
-        }
+    Result<std::string> read_str(const rapidjson::Document& doc,
+                                 const std::string& key);
+    Result<int> read_int(const rapidjson::Document& doc,
+                         const std::string& key);
+    Result<bool> read_bool(const rapidjson::Document& doc,
+                           const std::string& key);
+    Result<> read_object(const rapidjson::Document& doc, const std::string& key,
+                         rapidjson::Document& res_doc_ref);
 
-        ~ReadException() {}
+    Result<>
+    for_each(const rapidjson::Document& doc, const std::string& key,
+             std::function<Result<>(const rapidjson::Document&)> callback);
 
-        const char* what() const throw() override { return m_msg.c_str(); }
-
-      private:
-        std::string m_msg;
-    };
-
-    std::string read_str(const rapidjson::Document& doc,
-                         const std::string& name);
-    int read_int(const rapidjson::Document& doc, const std::string& name);
-
-    Values m_values;
-
-    hc::util::Logger m_logger;
+    std::string m_path;
 };
