@@ -51,6 +51,9 @@ void RPiZDriver::write() {
     if (gpioWrite(m_pin, m_value ? 1 : 0) != 0) {
         m_logger.error("write(): Write failed");
     }
+
+    m_logger.verbose("Pin: " + std::to_string(m_pin) +
+                     ", value: " + std::to_string(m_value));
 }
 
 void RPiZDriver::PlugV1Interface::on() {
