@@ -37,11 +37,16 @@ class Driver {
 
 class Driver::HardwareInterface {
   protected:
-    HardwareInterface() {}
+    HardwareInterface() : m_pin(0) {}
 
   public:
     ~HardwareInterface() {}
 
     virtual void on() = 0;
     virtual void off() = 0;
+
+    void set_pin(unsigned int pin) { m_pin = pin; }
+
+  protected:
+    unsigned int m_pin;
 };

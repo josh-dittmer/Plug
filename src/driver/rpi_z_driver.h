@@ -43,7 +43,7 @@ class RPiZDriver::PlugV1Interface : public Driver::HardwareInterface {
 
   public:
     PlugV1Interface(Private, const std::shared_ptr<RPiZDriver>& driver)
-        : HardwareInterface(), m_driver(driver), m_pin(0) {}
+        : HardwareInterface(), m_driver(driver) {}
     ~PlugV1Interface() {}
 
     static std::shared_ptr<PlugV1Interface>
@@ -54,10 +54,6 @@ class RPiZDriver::PlugV1Interface : public Driver::HardwareInterface {
     void on() override;
     void off() override;
 
-    void set_pin(unsigned int pin) { m_pin = pin; }
-
   private:
     std::shared_ptr<RPiZDriver> m_driver;
-
-    unsigned int m_pin;
 };

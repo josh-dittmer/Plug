@@ -25,6 +25,7 @@ bool Plug::init(const std::shared_ptr<Driver>& driver) {
                          m_config.m_model_str);
 
     m_interface = interface_res.unwrap();
+    m_interface->set_pin(m_config.m_gpio_pin);
 
     // create initial state
     hc::api::plug::State state;
