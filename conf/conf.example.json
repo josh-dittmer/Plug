@@ -1,17 +1,20 @@
 {
     "log_level": "VERBOSE",
+    "driver": "TEST",
     "gateway_url": "http://localhost:42069/api/v1/gateway/",
     "gateway_namespace": "device",
     "reconn_delay": 3000,
     "reconn_attempts": 3,
     "plugs": [
         {
+            "model": "PLUG_V1",
             "gpio_pin": 22,
             "lock_duration": 1000,
             "device_id": "<my device's uuidv4>",
             "secret": "<my device's secret>"
         },
         {
+            "model": "PLUG_V1",
             "gpio_pin": 23,
             "lock_duration": 1000,
             "device_id": "<my device's uuidv4>",
